@@ -2,23 +2,44 @@
 
 import { clerkClient } from "@clerk/nextjs/server";
 import {getRandomColor, parseStringify} from "@/lib/utils";
+import {liveblocks} from "@/lib/liveblocks";
 
 export const getClerkUser = async({ userIds } : { userIds: string[] }) => {
     try {
-        const { data } = await clerkClient.users.getUserList({
+        const { data } =  await (await clerkClient()).users.getUserList({
             emailAddress: userIds
         });
 
-        const users = data.map(user => ({
+        const users = data?.map(user => ({
             id: user.id,
             name: `${user.firstName} ${user.lastName}`,
-            emailAddress: user.emailAddress,
+            email: user.emailAddresses[0].emailAddress,
             avatar: user.imageUrl
         }));
 
-        const sortedUsers = users.sort((a, b) => a.id - b.id);
+        const sortedUsers = userIds.map((email) => users.find((user) => user.email === email));
         return parseStringify(sortedUsers);
     } catch (err) {
         console.error(`Error Fetching Users: ${err}`);
+    }
+}
+
+export const getDocumentUsers = async ({ roomId, currentUser, text }: { roomId: string, currentUser: string, text: string }) => {
+    try {
+        const room = await liveblocks.getRoom(roomId);
+
+        const users = Object.keys(room.usersAccesses).filter((email) => email !== currentUser);
+
+        if(text.length) {
+            const lowerCaseText = text.toLowerCase();
+
+            const filteredUsers = users.filter((email: string) => email.toLowerCase().includes(lowerCaseText))
+
+            return parseStringify(filteredUsers);
+        }
+
+        return parseStringify(users);
+    } catch (error) {
+        console.log(`Error fetching document users: ${error}`);
     }
 }
