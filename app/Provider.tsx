@@ -1,9 +1,10 @@
-"use client"
+"use client";
 import React from 'react';
 import {ClientSideSuspense, LiveblocksProvider} from "@liveblocks/react/suspense";
 import Loader from "@/components/Loader";
 import { useUser } from '@clerk/nextjs';
 import {getClerkUser, getDocumentUsers} from "@/lib/actions/user.actions";
+import { AppProgressBar as ProgressBar} from 'next-nprogress-bar';
 
 const Provider = ({ children } : { children: React.ReactNode}) => {
     const { user: clerkUser } = useUser();
@@ -27,6 +28,12 @@ const Provider = ({ children } : { children: React.ReactNode}) => {
         >
             <ClientSideSuspense fallback={<Loader />}>
                 {children}
+                <ProgressBar
+                    height="6px"
+                    color="#29d"
+                    options={{ showSpinner: false }}
+                    shallowRouting
+                />
             </ClientSideSuspense>
         </LiveblocksProvider>
     )
