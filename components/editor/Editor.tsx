@@ -79,7 +79,7 @@ export function Editor({ roomId, currentUserType } : { roomId: string, currentUs
 
           <LiveblocksPlugin>
             <FloatingComposer className="w-[350px]" />
-            <FloatingThreads threads={threads} />
+            <FloatingThreads threads={threads || []} />
             <Comments />
           </LiveblocksPlugin>
         </div>
